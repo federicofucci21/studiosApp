@@ -59,8 +59,14 @@ function cambiarFormatoFecha(fecha) {
   return nuevaFecha;
 }
 
+//FUNCION PARA QUITAR PUNTOS DEL DNI
+function quitarPuntosDNI(dni) {
+  // Utilizamos una expresión regular para encontrar y reemplazar los puntos en el DNI
+  return dni.replace(/\./g, "");
+}
+
 // FUNCION PARA CREAR NUEVO PDF PAQUI
-async function createCamposPdf(input, output, i, ox) {
+async function createOctPdf(input, output, i, ox) {
   // console.log("INPUT", input);
   try {
     const pdfDoc = await PDFDocument.load(await readFile(input));
@@ -73,11 +79,11 @@ async function createCamposPdf(input, output, i, ox) {
     //OBTENER NOMBRE DE EXCEL
     const dataExcel = leerExcel("baseDatos.xlsx");
     const nombrePaciente = dataExcel[i].Paciente;
-    const dniPaciente = dataExcel[i].DNI;
+    const dniPaciente = quitarPuntosDNI(dataExcel[i].DNI);
     const fechaNacimiento = dataExcel[i].FechaDeNacimiento;
     const fechaValidacion = dataExcel[i].FechaValidacion;
     const hora = dataExcel[i].Hora;
-    let genero = dataExcel[i].Observaciones;
+    let genero = dataExcel[i].genero;
     if (genero === "h") {
       genero = "Masculino";
     } else {
@@ -147,7 +153,7 @@ async function createCamposPdf(input, output, i, ox) {
     }
 
     //FECHA Y HORA 1
-    const minutosTopo = ox==="os"?10:11;
+    const minutosTopo = ox==="os"?11:12;
     firstPage.drawText(
       fechaValidacion.toString() +
         " / " +
@@ -242,11 +248,11 @@ function funcionCompletaOct() {
     if (dataExcel[i].OCT == "x") {
       const dataExcel = leerExcel("baseDatos.xlsx");
       const nombrePaciente = dataExcel[i].Paciente;
-      const dniPaciente = dataExcel[i].DNI;
+      const dniPaciente = quitarPuntosDNI(dataExcel[i].DNI)
       const fechaNacimiento = dataExcel[i].FechaDeNacimiento;
       const fechaValidacion = dataExcel[i].FechaValidacion;
-      let genero = dataExcel[i].Observaciones;
-      if (genero === "h") {
+      let genero = dataExcel[i].genero;
+      if (genero == "h") {
         genero = "Male";
       } else {
         genero = "Female";
@@ -288,9 +294,9 @@ function funcionCompletaOct() {
           partesFecha[0]
         );
 
-        var dia = fechaObjeto.getDate();
-        var mes = fechaObjeto.getMonth() + 1;
-        var año = fechaObjeto.getFullYear();
+        var dia = fechaObjeto.getDate().toString();
+        var mes = (fechaObjeto.getMonth() + 1).toString();
+        var año = fechaObjeto.getFullYear().toString();
 
         // Añadir ceros iniciales si es necesario
         if (dia < 10) {
@@ -346,7 +352,7 @@ function funcionCompletaOct() {
       const fechaEstudioSinEspacios = cambiarFormatoFechaJunta(fechaValidacion);
       const numeroAzar = numeroAlAzar(1, 5)
 
-      createCamposPdf(
+      createOctPdf(
         "./oct/" + numeroAzar + "od.pdf",
         // "Alejandro_Gloria Nancy_14491124_19611017_Female_Macula Cube 512x32_20230612093800_OD_Macular Thickness Analysis_20230612124241.pdf",
 
@@ -364,7 +370,7 @@ function funcionCompletaOct() {
           ".pdf",
         i, "od"
       );
-      createCamposPdf(
+      createOctPdf(
         "./oct/" + numeroAzar + "os.pdf",
         // "Alejandro_Gloria Nancy_14491124_19611017_Female_Macula Cube 512x32_20230612093800_OD_Macular Thickness Analysis_20230612124241.pdf",
 

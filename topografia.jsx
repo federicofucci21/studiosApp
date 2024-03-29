@@ -59,8 +59,14 @@ function cambiarFormatoFecha(fecha) {
   return nuevaFecha;
 }
 
+//FUNCION PARA QUITAR PUNTOS DEL DNI
+function quitarPuntosDNI(dni) {
+  // Utilizamos una expresión regular para encontrar y reemplazar los puntos en el DNI
+  return dni.replace(/\./g, "");
+}
+
 // FUNCION PARA CREAR NUEVO PDF PAQUI
-async function createCamposPdf(input, output, i) {
+async function createTopografiaPdf(input, output, i) {
   // console.log("INPUT", input);
   try {
     const pdfDoc = await PDFDocument.load(await readFile(input));
@@ -73,11 +79,11 @@ async function createCamposPdf(input, output, i) {
     //OBTENER NOMBRE DE EXCEL
     const dataExcel = leerExcel("baseDatos.xlsx");
     const nombrePaciente = dataExcel[i].Paciente;
-    const dniPaciente = dataExcel[i].DNI;
+    const dniPaciente = quitarPuntosDNI(dataExcel[i].DNI);
     const fechaNacimiento = dataExcel[i].FechaDeNacimiento;
     const fechaValidacion = dataExcel[i].FechaValidacion;
     const hora = dataExcel[i].Hora;
-    let genero = dataExcel[i].Observaciones;
+    let genero = dataExcel[i].genero;
     if (genero === "h") {
       genero = "M";
     } else {
@@ -193,7 +199,7 @@ async function createCamposPdf(input, output, i) {
       console.log("NUEVA FECHA", nuevaFecha);
       return nuevaFecha;
     }
-    let fechaCambiada = cambiarFormatoFecha(fechaValidacion)
+    let fechaCambiada = cambiarFormatoFecha(fechaValidacion);
     //FECHA Y HORA 2
 
     firstPage.drawText(
@@ -245,13 +251,13 @@ function funcionCompletaTopografia() {
   const dataExcel = leerExcel("baseDatos.xlsx");
   // console.log(dataExcel)
   for (let i = 0; i < dataExcel.length; i++) {
-    if (dataExcel[i].CampoVisual == "x") {
+    if (dataExcel[i].Topografia == "x") {
       const dataExcel = leerExcel("baseDatos.xlsx");
       const nombrePaciente = dataExcel[i].Paciente;
-      const dniPaciente = dataExcel[i].DNI;
+      const dniPaciente = quitarPuntosDNI(dataExcel[i].DNI);
       const fechaNacimiento = dataExcel[i].FechaDeNacimiento;
       const fechaValidacion = dataExcel[i].FechaValidacion;
-      let genero = dataExcel[i].Observaciones;
+      let genero = dataExcel[i].genero;
       if (genero === "h") {
         genero = "Hombre";
       } else {
@@ -285,6 +291,7 @@ function funcionCompletaTopografia() {
         console.log("NUEVA FECHA", nuevaFecha);
         return nuevaFecha;
       }
+
 
       const partesFechaNacimiento =
         cambiarFormatoFecha(fechaNacimiento).split("-");
@@ -323,8 +330,8 @@ function funcionCompletaTopografia() {
         return Math.floor(Math.random() * (max - min + 1)) + min;
       }
 
-      createCamposPdf(
-        "./topografia/"+numeroAlAzar(1, 6)+".pdf",
+      createTopografiaPdf(
+        "./topografia/" + numeroAlAzar(1, 6) + ".pdf",
         // "./topografia/10670676_VARGAS_MARIA____23_12_1952_OD_OS___08_01_2024_MAPA_CORNEAL.pdf",
 
         dniPaciente +
@@ -351,4 +358,4 @@ function funcionCompletaTopografia() {
   }
 }
 
-funcionCompletaTopografia()
+funcionCompletaTopografia();

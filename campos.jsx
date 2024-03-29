@@ -59,6 +59,12 @@ function cambiarFormatoFecha(fecha) {
   return nuevaFecha;
 }
 
+//FUNCION PARA QUITAR PUNTOS DEL DNI
+function quitarPuntosDNI(dni) {
+  // Utilizamos una expresión regular para encontrar y reemplazar los puntos en el DNI
+  return dni.replace(/\./g, "");
+}
+
 // FUNCION PARA CREAR NUEVO PDF PAQUI
 async function createCamposPdf(input, output, i) {
   console.log("INPUT", input);
@@ -73,19 +79,19 @@ async function createCamposPdf(input, output, i) {
     //OBTENER NOMBRE DE EXCEL
     const dataExcel = leerExcel("baseDatos.xlsx");
     const nombrePaciente = dataExcel[i].Paciente;
-    const dniPaciente = dataExcel[i].DNI;
+    const dniPaciente = quitarPuntosDNI(dataExcel[i].DNI);
     const fechaNacimiento = dataExcel[i].FechaDeNacimiento;
     const fechaValidacion = dataExcel[i].FechaValidacion;
     const hora = dataExcel[i].Hora;
-    let genero = dataExcel[i].Observaciones;
+    let genero = dataExcel[i].genero;
     if (genero === "h") {
       genero = "Hombre";
     } else {
       genero = "Mujer";
     }
     console.log(dataExcel[i].Hora);
-    console.log("NOMBRE PACIENTE", capitalizeFullName(nombrePaciente))
-    console.log("FECHA NACIMIENTO", fechaNacimiento)
+    console.log("NOMBRE PACIENTE", capitalizeFullName(nombrePaciente));
+    console.log("FECHA NACIMIENTO", fechaNacimiento);
 
     //NOMBRE
     firstPage.drawText(
@@ -206,9 +212,8 @@ function funcionCompletaCampos() {
     if (dataExcel[i].CampoVisual == "x") {
       const dataExcel = leerExcel("baseDatos.xlsx");
       const nombrePaciente = dataExcel[i].Paciente;
-      const dniPaciente = dataExcel[i].DNI;
+      const dniPaciente = quitarPuntosDNI(dataExcel[i].DNI);
       const fechaNacimiento = dataExcel[i].FechaDeNacimiento;
-      const fechaValidacion = dataExcel[i].FechaValidacion;
       let genero = dataExcel[i].Observaciones;
       if (genero === "h") {
         genero = "Hombre";
@@ -246,10 +251,10 @@ function funcionCompletaCampos() {
       const partesFecha = cambiarFormatoFecha(fechaNacimiento).split("-");
       function numeroAlAzar(min, max) {
         return Math.floor(Math.random() * (max - min + 1)) + min;
-    }
+      }
 
       createCamposPdf(
-        "./campos/"+numeroAlAzar(1, 10)+".pdf",
+        "./campos/" + numeroAlAzar(1, 10) + ".pdf",
 
         dniPaciente +
           "_" +
@@ -269,4 +274,4 @@ function funcionCompletaCampos() {
   }
 }
 
-funcionCompletaCampos()
+funcionCompletaCampos();

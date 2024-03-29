@@ -72,6 +72,12 @@ function cambiarFormatoFecha(fecha) {
   return nuevaFecha;
 }
 
+//FUNCION PARA QUITAR PUNTOS DEL DNI
+function quitarPuntosDNI(dni) {
+  // Utilizamos una expresión regular para encontrar y reemplazar los puntos en el DNI
+  return dni.replace(/\./g, "");
+}
+
 // FUNCION PARA CREAR NUEVO PDF PAQUI
 async function createPaquiPdf(input, output, i) {
   try {
@@ -83,20 +89,21 @@ async function createPaquiPdf(input, output, i) {
 
     //OBTENER NOMBRE DE EXCEL
     const dataExcel = leerExcel("baseDatos.xlsx");
+    // console.log("NOMBRE", dataExcel.dni)
     const nombrePaciente = dataExcel[i].Paciente;
-    const dniPaciente = dataExcel[i].DNI;
+    const dniPaciente = quitarPuntosDNI(dataExcel[i].DNI);
     const fechaNacimiento = dataExcel[i].FechaDeNacimiento;
     const numAfiliado = dataExcel[i].Afiliado;
     const fechaValidacion = dataExcel[i].FechaValidacion;
     const paquiOD = dataExcel[i].paquiOD;
     const paquiOI = dataExcel[i].paquiOI;
-    let genero = dataExcel[i].Observaciones;
+    let genero = dataExcel[i].genero;
     if (genero === "h") {
       genero = "Hombre";
     } else {
       genero = "Mujer";
     }
-
+    console.log("NOMBRE", dniPaciente)
     // OBTENER EDAD DEL PACIENTE
     const nuevaFecha = cambiarFormatoFecha(fechaNacimiento);
     const edadPaciente = calcularEdad(nuevaFecha);
@@ -201,15 +208,27 @@ async function createPaquiPdf(input, output, i) {
 
 function funcionCompletaPaqui() {
   const dataExcel = leerExcel("baseDatos.xlsx");
+  // console.log("NOMBRE", dataExcel)
+  // if (dataExcel.paquiOD === undefined) {
+  //   console.log("NO DATA FOR THIS EXAM, CHECK WITH DOCTOR");
+  //   return "NO DATA FOR THIS EXAM, CHECK WITH DOCTOR";
+  // }
 
   for (let i = 0; i < dataExcel.length; i++) {
     if (dataExcel[i].Paquimetria == "x") {
-      const nombrePaciente = dataExcel[i].Paciente;
-      createPaquiPdf(
-        "./modeloPaqui.pdf",
-        capitalizeFullName(nombrePaciente) + " PAQUI" + ".pdf",
-        i
-      );
+      if (dataExcel[i].paquiOD === undefined || dataExcel[i].paquiOI === undefined) {
+        console.log("PACIENTE: "+dataExcel[i].Paciente+" HAS DATA FOR THIS EXAM, CHECK WITH DOCTOR");
+        
+      }else{
+        const nombrePaciente = dataExcel[i].Paciente;
+        createPaquiPdf(
+          "./modeloPaqui.pdf",
+          capitalizeFullName(nombrePaciente) + " PAQUI" + ".pdf",
+          i
+          );
+      }
+
+  
     }
   }
 }

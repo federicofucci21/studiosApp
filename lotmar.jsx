@@ -74,8 +74,14 @@ function cambiarFormatoFecha(fecha) {
   return nuevaFecha;
 }
 
+//FUNCION PARA QUITAR PUNTOS DEL DNI
+function quitarPuntosDNI(dni) {
+  // Utilizamos una expresión regular para encontrar y reemplazar los puntos en el DNI
+  return dni.replace(/\./g, "");
+}
+
 // FUNCION PARA CREAR NUEVO PDF PAQUI
-async function createPaquiPdf(input, output, i) {
+async function createLotmarPdf(input, output, i) {
   try {
     const pdfDoc = await PDFDocument.load(await readFile(input));
 
@@ -86,13 +92,13 @@ async function createPaquiPdf(input, output, i) {
     //OBTENER NOMBRE DE EXCEL
     const dataExcel = leerExcel("baseDatos.xlsx");
     const nombrePaciente = dataExcel[i].Paciente;
-    const dniPaciente = dataExcel[i].DNI;
+    const dniPaciente = quitarPuntosDNI(dataExcel[i].DNI);
     const fechaNacimiento = dataExcel[i].FechaDeNacimiento;
     const numAfiliado = dataExcel[i].Afiliado;
     const fechaValidacion = dataExcel[i].FechaValidacion;
     const paquiOD = dataExcel[i].lotmarOD;
     const paquiOI = dataExcel[i].lotmarOI;
-    let genero = dataExcel[i].Observaciones;
+    let genero = dataExcel[i].genero;
     if (genero === "h") {
       genero = "Hombre";
     } else {
@@ -205,13 +211,24 @@ function funcionCompletaLotmar() {
   const dataExcel = leerExcel("baseDatos.xlsx");
 
   for (let i = 0; i < dataExcel.length; i++) {
-    if (dataExcel[i].Lotmar == "x") {
-      const nombrePaciente = dataExcel[i].Paciente;
-      createPaquiPdf(
-        "./modeloLotmar.pdf",
-        capitalizeFullName(nombrePaciente) + " LOTMAR" + ".pdf",
-        i
+    if (
+      dataExcel[i].lotmarOD === undefined ||
+      dataExcel[i].lotmarOI === undefined
+    ) {
+      console.log(
+        "PACIENTE: " +
+          dataExcel[i].Paciente +
+          " HAS DATA FOR THIS EXAM, CHECK WITH DOCTOR"
       );
+    } else {
+      if (dataExcel[i].Lotmar == "x") {
+        const nombrePaciente = dataExcel[i].Paciente;
+        createLotmarPdf(
+          "./modeloLotmar.pdf",
+          capitalizeFullName(nombrePaciente) + " LOTMAR" + ".pdf",
+          i
+        );
+      }
     }
   }
 }

@@ -59,8 +59,14 @@ function cambiarFormatoFecha(fecha) {
   return nuevaFecha;
 }
 
+//FUNCION PARA QUITAR PUNTOS DEL DNI
+function quitarPuntosDNI(dni) {
+  // Utilizamos una expresión regular para encontrar y reemplazar los puntos en el DNI
+  return dni.replace(/\./g, "");
+}
+
 // FUNCION PARA CREAR NUEVO PDF PAQUI
-async function createCamposPdf(input, output, i) {
+async function createHrtPdf(input, output, i) {
   // console.log("INPUT", input);
   try {
     const pdfDoc = await PDFDocument.load(await readFile(input));
@@ -73,11 +79,11 @@ async function createCamposPdf(input, output, i) {
     //OBTENER NOMBRE DE EXCEL
     const dataExcel = leerExcel("baseDatos.xlsx");
     const nombrePaciente = dataExcel[i].Paciente;
-    const dniPaciente = dataExcel[i].DNI;
+    const dniPaciente = quitarPuntosDNI(dataExcel[i].DNI);
     const fechaNacimiento = dataExcel[i].FechaDeNacimiento;
     const fechaValidacion = dataExcel[i].FechaValidacion;
     const hora = dataExcel[i].Hora;
-    let genero = dataExcel[i].Observaciones;
+    let genero = dataExcel[i].genero;
     if (genero === "h") {
       genero = "Masculino";
     } else {
@@ -105,7 +111,7 @@ async function createCamposPdf(input, output, i) {
       color: rgb(0, 0, 0),
       opacity: 1,
     });
-    console.log("nombre");
+    // console.log("nombre");
 
     //FECHA NACIMIENTO
     firstPage.drawText(fechaNacimiento.toString(), {
@@ -147,7 +153,7 @@ async function createCamposPdf(input, output, i) {
     }
 
     //FECHA Y HORA 1
-    const minutos1 = 12;
+    const minutos1 = 13;
     firstPage.drawText(
       fechaValidacion.toString() + " / " + sumarMinutosAHorario(hora, minutos1),
       {
@@ -183,12 +189,12 @@ async function createCamposPdf(input, output, i) {
 
       // Construir la cadena con el nuevo formato
       var nuevaFecha = año + "/" + mes + "/" + dia;
-      console.log("NUEVA FECHA", nuevaFecha);
+      // console.log("NUEVA FECHA", nuevaFecha);
       return nuevaFecha;
     }
     let fechaCambiada = cambiarFormatoFecha(fechaValidacion);
     //FECHA Y HORA 2
-    const minutos2 = 14;
+    const minutos2 = 15;
     firstPage.drawText(
       fechaValidacion.toString() + " / " + sumarMinutosAHorario(hora, minutos2),
       {
@@ -202,7 +208,7 @@ async function createCamposPdf(input, output, i) {
       }
     );
     //FECHA Y HORA 3
-    const minutos3 = 13;
+    const minutos3 = 14;
     firstPage.drawText(
       fechaValidacion.toString() + " / " + sumarMinutosAHorario(hora, minutos3),
       {
@@ -251,17 +257,19 @@ function funcionCompletaHrt() {
     if (dataExcel[i].HRT == "x") {
       const dataExcel = leerExcel("baseDatos.xlsx");
       const nombrePaciente = dataExcel[i].Paciente;
-      const dniPaciente = dataExcel[i].DNI;
+      const dniPaciente = quitarPuntosDNI(dataExcel[i].DNI);
       const fechaNacimiento = dataExcel[i].FechaDeNacimiento;
       const fechaValidacion = dataExcel[i].FechaValidacion;
-      let genero = dataExcel[i].Observaciones;
+      let genero = dataExcel[i].genero;
       if (genero === "h") {
         genero = "Male";
-      } else {
+      } else if (genero === "m"){
         genero = "Female";
+      } else {
+        console.log("El paciente " + nombrePaciente + " no tiene un genero asignado" )
       }
       const partesNombre = capitalizeFullName(nombrePaciente).split(" ");
-      console.log("PARTEs", partesNombre);
+      // console.log("PARTEs", partesNombre);
 
       function cambiarFormatoFecha(fecha) {
         var partesFecha = fecha.split("/");
@@ -285,13 +293,13 @@ function funcionCompletaHrt() {
 
         // Construir la cadena con el nuevo formato
         var nuevaFecha = dia + "-" + mes + "-" + año;
-        console.log("NUEVA FECHA", nuevaFecha);
+        // console.log("NUEVA FECHA", nuevaFecha);
         return nuevaFecha;
       }
 
       function cambiarFormatoFechaJunta(fecha) {
         var partesFecha = fecha.split("/");
-        console.log("PARTESFECHA", partesFecha)
+        // console.log("PARTESFECHA", partesFecha)
         var fechaObjeto = new Date(
           partesFecha[2],
           partesFecha[1] - 1,
@@ -312,7 +320,7 @@ function funcionCompletaHrt() {
 
         // Construir la cadena con el nuevo formato
         var nuevaFecha = año.toString() + mes.toString() + dia.toString();
-        console.log("NUEVA FECHA", nuevaFecha);
+        // console.log("NUEVA FECHA", nuevaFecha);
         return nuevaFecha;
       }
 
@@ -359,7 +367,7 @@ function funcionCompletaHrt() {
       const fechaEstudioSinEspacios = cambiarFormatoFechaJunta(fechaValidacion);
       const numeroAzar = numeroAlAzar(1, 6);
 
-      createCamposPdf(
+      createHrtPdf(
         "./hrt/" + numeroAzar + ".pdf",
         // "Bianchi_Florinda_10080922_19520228_Female_Optic Disc Cube 128x128_20230628110825_OU_ONH _ RNFL Analysis_20230629115021",
 

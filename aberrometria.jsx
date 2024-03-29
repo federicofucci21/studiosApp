@@ -59,8 +59,14 @@ function cambiarFormatoFecha(fecha) {
   return nuevaFecha;
 }
 
+//FUNCION PARA QUITAR PUNTOS DEL DNI
+function quitarPuntosDNI(dni) {
+  // Utilizamos una expresión regular para encontrar y reemplazar los puntos en el DNI
+  return dni.replace(/\./g, "");
+}
+
 // FUNCION PARA CREAR NUEVO PDF PAQUI
-async function createCamposPdf(input, output, i) {
+async function createAberrometriaPdf(input, output, i) {
   // console.log("INPUT", input);
   try {
     const pdfDoc = await PDFDocument.load(await readFile(input));
@@ -73,11 +79,11 @@ async function createCamposPdf(input, output, i) {
     //OBTENER NOMBRE DE EXCEL
     const dataExcel = leerExcel("baseDatos.xlsx");
     const nombrePaciente = dataExcel[i].Paciente;
-    const dniPaciente = dataExcel[i].DNI;
+    const dniPaciente = quitarPuntosDNI(dataExcel[i].DNI);
     const fechaNacimiento = dataExcel[i].FechaDeNacimiento;
     const fechaValidacion = dataExcel[i].FechaValidacion;
     const hora = dataExcel[i].Hora;
-    let genero = dataExcel[i].Observaciones;
+    let genero = dataExcel[i].genero;
     if (genero === "h") {
       genero = "M";
     } else {
@@ -151,7 +157,7 @@ async function createCamposPdf(input, output, i) {
     }
 
     //FECHA Y HORA 1
-    const minutosTopo = 9;
+    const minutosTopo = 10;
     firstPage.drawText(
       fechaValidacion.toString() +
         " / " +
@@ -193,7 +199,7 @@ async function createCamposPdf(input, output, i) {
       console.log("NUEVA FECHA", nuevaFecha);
       return nuevaFecha;
     }
-    let fechaCambiada = cambiarFormatoFecha(fechaValidacion)
+    let fechaCambiada = cambiarFormatoFecha(fechaValidacion);
     //FECHA Y HORA 2
 
     firstPage.drawText(
@@ -248,10 +254,10 @@ function funcionCompletaAberrometria() {
     if (dataExcel[i].Aberrometria == "x") {
       const dataExcel = leerExcel("baseDatos.xlsx");
       const nombrePaciente = dataExcel[i].Paciente;
-      const dniPaciente = dataExcel[i].DNI;
+      const dniPaciente = quitarPuntosDNI(dataExcel[i].DNI);
       const fechaNacimiento = dataExcel[i].FechaDeNacimiento;
       const fechaValidacion = dataExcel[i].FechaValidacion;
-      let genero = dataExcel[i].Observaciones;
+      let genero = dataExcel[i].genero;
       if (genero === "h") {
         genero = "Hombre";
       } else {
@@ -323,8 +329,8 @@ function funcionCompletaAberrometria() {
         return Math.floor(Math.random() * (max - min + 1)) + min;
       }
 
-      createCamposPdf(
-        "./aberrometria/"+numeroAlAzar(1, 10)+".pdf",
+      createAberrometriaPdf(
+        "./aberrometria/" + numeroAlAzar(1, 10) + ".pdf",
         // "./aberrometria/10482941_ACTIS_HUGO____24_12_1952_OD_OS___30_10_2023__09_17___ZERNIKE.pdf",
 
         dniPaciente +
@@ -351,4 +357,4 @@ function funcionCompletaAberrometria() {
   }
 }
 
-funcionCompletaAberrometria()
+funcionCompletaAberrometria();

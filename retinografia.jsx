@@ -35,21 +35,40 @@ function capitalizeFullName(fullName) {
 function agregarPuntosDNI(dni) {
   // Convertir el número de DNI a string para facilitar la manipulación
   dni = dni.toString();
+  console.log(dni);
 
   // Verificar que el número de DNI tenga al menos 7 dígitos
   if (dni.length < 7) {
     return "El número de DNI debe tener al menos 7 dígitos.";
   }
+  if (dni.length == 7) {
 
-  // Agregar puntos según el formato estándar
-  var dniConPuntos =
-    dni.substring(0, 2) + "." + dni.substring(2, 5) + "." + dni.substring(5);
+    // Agregar puntos según el formato estándar
+    var dniConPuntos =
+    dni.substring(0, 1) + "." + dni.substring(1, 4) + "." + dni.substring(4);
+    console.log(dniConPuntos);
+    return dniConPuntos;
+  }
+  if (dni.length == 8) {
 
-  return dniConPuntos;
+    // Agregar puntos según el formato estándar
+    var dniConPuntos =
+    dni.substring(0, 2) + "."+ dni.substring(2, 5) + "." + dni.substring(5);
+      // dni.substring(0) + "." + dni.substring(1, 3) + "." + dni.substring(4);
+      console.log(dniConPuntos);
+    return dniConPuntos;
+  }
+}
+
+//FUNCION PARA QUITAR PUNTOS DEL DNI
+function quitarPuntosDNI(dni) {
+  // Utilizamos una expresión regular para encontrar y reemplazar los puntos en el DNI
+  return dni.replace(/\./g, "");
+
 }
 
 // FUNCION PARA CREAR NUEVO PDF PAQUI
-async function createPaquiPdf(input, output, i) {
+async function createRetinografiaPdf(input, output, i) {
   try {
     const pdfDoc = await PDFDocument.load(await readFile(input));
 
@@ -60,7 +79,7 @@ async function createPaquiPdf(input, output, i) {
     //OBTENER NOMBRE DE EXCEL
     const dataExcel = leerExcel("baseDatos.xlsx");
     const nombrePaciente = dataExcel[i].Paciente;
-    const dniPaciente = dataExcel[i].DNI;
+    const dniPaciente = quitarPuntosDNI(dataExcel[i].DNI).toString();
     const fechaValidacion = dataExcel[i].FechaValidacion;
 
     const partesNombre = capitalizeFullName(nombrePaciente).split(" ");
@@ -160,7 +179,7 @@ function funcionCompletaRetinografia() {
   for (let i = 0; i < dataExcel.length; i++) {
     if (dataExcel[i].Retinografia == "x") {
       const nombrePaciente = dataExcel[i].Paciente;
-      createPaquiPdf(
+      createRetinografiaPdf(
         "./retinografia/" + numeroAlAzar(1, 6) + ".pdf",
         capitalizeFullName(nombrePaciente) + " RETINOGRAFIA" + ".pdf",
         i

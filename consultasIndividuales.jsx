@@ -32,19 +32,19 @@ function capitalizeFullName(fullName) {
   return words.join(" ");
 }
 
-// FUNCION PARA CALCULAR LA EDAD
-function calcularEdad(fechaNacimiento) {
-  var hoy = new Date();
-  var fechaNacimiento = new Date(fechaNacimiento);
-  var edad = hoy.getFullYear() - fechaNacimiento.getFullYear();
-  var mes = hoy.getMonth() - fechaNacimiento.getMonth();
+// // FUNCION PARA CALCULAR LA EDAD
+// function calcularEdad(fechaNacimiento) {
+//   var hoy = new Date();
+//   var fechaNacimiento = new Date(fechaNacimiento);
+//   var edad = hoy.getFullYear() - fechaNacimiento.getFullYear();
+//   var mes = hoy.getMonth() - fechaNacimiento.getMonth();
 
-  if (mes < 0 || (mes === 0 && hoy.getDate() < fechaNacimiento.getDate())) {
-    edad--;
-  }
+//   if (mes < 0 || (mes === 0 && hoy.getDate() < fechaNacimiento.getDate())) {
+//     edad--;
+//   }
 
-  return edad;
-}
+//   return edad;
+// }
 
 //FUNCION PARA MODIFICAR FORMATO DE FECHA
 function cambiarFormatoFecha(fecha) {
@@ -73,12 +73,6 @@ function cambiarFormatoFecha(fecha) {
   return nuevaFecha;
 }
 
-//FUNCION PARA QUITAR PUNTOS DEL DNI
-function quitarPuntosDNI(dni) {
-  // Utilizamos una expresión regular para encontrar y reemplazar los puntos en el DNI
-  return dni.replace(/\./g, "");
-}
-
 // FUNCION PARA CREAR NUEVO PDF PAQUI
 async function createConsultaPdf(input, output, i) {
   try {
@@ -91,20 +85,8 @@ async function createConsultaPdf(input, output, i) {
     //OBTENER NOMBRE DE EXCEL
     const dataExcel = leerExcel("baseDatos.xlsx");
     const nombrePaciente = dataExcel[i].Paciente;
-    const dniPaciente = quitarPuntosDNI(dataExcel[i].DNI);
-    const fechaNacimiento = dataExcel[i].FechaDeNacimiento;
     const numAfiliado = dataExcel[i].Afiliado;
     const fechaValidacion = dataExcel[i].FechaValidacion;
-    let genero = dataExcel[i].genero;
-    if (genero === "h") {
-      genero = "Hombre";
-    } else {
-      genero = "Mujer";
-    }
-
-    // OBTENER EDAD DEL PACIENTE
-    const nuevaFecha = cambiarFormatoFecha(fechaNacimiento);
-    const edadPaciente = calcularEdad(nuevaFecha);
 
     //NOMBRE
     firstPage.drawText(capitalizeFullName(nombrePaciente), {
@@ -116,30 +98,11 @@ async function createConsultaPdf(input, output, i) {
       opacity: 1,
     });
 
-    //DNI
-    firstPage.drawText("DNI " + dniPaciente.toString(), {
-      x: 72,
-      y: 697,
-      size: 10.99,
-      weight: 700,
-      color: rgb(0, 0, 0),
-      opacity: 1,
-    });
-
-    //EDAD y GENERO
-    firstPage.drawText(edadPaciente + " años " + genero, {
-      x: 72,
-      y: 683,
-      size: 10.99,
-      weight: 700,
-      color: rgb(0, 0, 0),
-      opacity: 1,
-    });
 
     //NUMERO AFILIADO
     firstPage.drawText("PAMI " + numAfiliado, {
       x: 72,
-      y: 669,
+      y: 695,
       size: 10.99,
       weight: 700,
       color: rgb(0, 0, 0),
@@ -148,8 +111,8 @@ async function createConsultaPdf(input, output, i) {
 
     //FECHA VALIDACION
     firstPage.drawText(fechaValidacion.toString(), {
-      x: 71,
-      y: 641,
+      x: 72,
+      y: 671,
       size: 10.99,
       weight: 700,
       color: rgb(0, 0, 0),
@@ -199,7 +162,7 @@ function funcionCompletaConsultas() {
       if (dataExcel[i].consulta == 1) {
         const nombrePaciente = dataExcel[i].Paciente;
         createConsultaPdf(
-          "./primerConsulta.pdf",
+          "./primerConsultaInd.pdf",
           capitalizeFullName(nombrePaciente) + ".pdf",
           i
         );
@@ -207,7 +170,7 @@ function funcionCompletaConsultas() {
       if (dataExcel[i].consulta == 2) {
         const nombrePaciente = dataExcel[i].Paciente;
         createConsultaPdf(
-          "./consultaSeguimiento.pdf",
+          "./consultaSeguimientoInd.pdf",
           capitalizeFullName(nombrePaciente) + ".pdf",
           i
         );
