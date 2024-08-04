@@ -78,7 +78,7 @@ async function createRetinografiaPdf(input, output, i) {
 
     //OBTENER NOMBRE DE EXCEL
     const dataExcel = leerExcel("baseDatos.xlsx");
-    const nombrePaciente = dataExcel[i].Paciente;
+    const nombrePaciente = dataExcel[i].Paciente.replace(/\n$/, "");
     const dniPaciente = quitarPuntosDNI(dataExcel[i].DNI).toString();
     const fechaValidacion = dataExcel[i].FechaValidacion;
 

@@ -88,7 +88,7 @@ async function createIolPdf(input, output, i) {
 
     //OBTENER NOMBRE DE EXCEL
     const dataExcel = leerExcel("baseDatos.xlsx");
-    const nombrePaciente = dataExcel[i].Paciente;
+    const nombrePaciente = dataExcel[i].Paciente.replace(/\n$/, "");
     const dniPaciente = quitarPuntosDNI(dataExcel[i].DNI);
     const fechaNacimiento = dataExcel[i].FechaDeNacimiento;
     const numAfiliado = dataExcel[i].Afiliado;
@@ -206,15 +206,12 @@ async function createIolPdf(input, output, i) {
 
 function funcionCompletaIol() {
   const dataExcel = leerExcel("baseDatos.xlsx");
-  console.log(dataExcel)
+  console.log(dataExcel);
 
   for (let i = 0; i < dataExcel.length; i++) {
-    console.log(dataExcel[i].Paciente)
-    console.log(dataExcel[i].iolOD)
-    if (
-      dataExcel[i].iolOD === undefined ||
-      dataExcel[i].iolOI === undefined
-    ) {
+    console.log(dataExcel[i].Paciente);
+    // console.log(dataExcel[i].iolOD);
+    if (dataExcel[i].iolOD === undefined || dataExcel[i].iolOI === undefined) {
       console.log(
         "PACIENTE: " +
           dataExcel[i].Paciente +
@@ -223,9 +220,14 @@ function funcionCompletaIol() {
     } else {
       if (dataExcel[i].IOL == "x") {
         const nombrePaciente = dataExcel[i].Paciente;
+        const fechaValidacion = dataExcel[i].FechaValidacion;
+        const dateForTitle = cambiarFormatoFecha(fechaValidacion);
         createIolPdf(
           "./modeloIol.pdf",
-          capitalizeFullName(nombrePaciente) + " IOL MASTER" + ".pdf",
+          capitalizeFullName(nombrePaciente) +
+            "_IOL MASTER_" +
+            dateForTitle +
+            ".pdf",
           i
         );
       }

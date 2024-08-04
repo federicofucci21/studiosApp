@@ -90,7 +90,7 @@ async function createPaquiPdf(input, output, i) {
     //OBTENER NOMBRE DE EXCEL
     const dataExcel = leerExcel("baseDatos.xlsx");
     // console.log("NOMBRE", dataExcel.dni)
-    const nombrePaciente = dataExcel[i].Paciente;
+    const nombrePaciente = dataExcel[i].Paciente.replace(/\n$/, "");
     const dniPaciente = quitarPuntosDNI(dataExcel[i].DNI);
     const fechaNacimiento = dataExcel[i].FechaDeNacimiento;
     const numAfiliado = dataExcel[i].Afiliado;
@@ -221,9 +221,13 @@ function funcionCompletaPaqui() {
         
       }else{
         const nombrePaciente = dataExcel[i].Paciente;
+        const dateForTitle = cambiarFormatoFecha(fechaValidacion);
         createPaquiPdf(
           "./modeloPaqui.pdf",
-          capitalizeFullName(nombrePaciente) + " PAQUI" + ".pdf",
+          capitalizeFullName(nombrePaciente) +
+            "_PAQUI_" +
+            dateForTitle +
+            ".pdf",
           i
           );
       }

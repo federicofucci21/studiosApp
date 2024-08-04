@@ -61,6 +61,7 @@ function cambiarFormatoFecha(fecha) {
 
 //FUNCION PARA QUITAR PUNTOS DEL DNI
 function quitarPuntosDNI(dni) {
+  // console.log("DNI", typeof(dni))
   // Utilizamos una expresión regular para encontrar y reemplazar los puntos en el DNI
   return dni.replace(/\./g, "");
 }
@@ -78,7 +79,7 @@ async function createAberrometriaPdf(input, output, i) {
 
     //OBTENER NOMBRE DE EXCEL
     const dataExcel = leerExcel("baseDatos.xlsx");
-    const nombrePaciente = dataExcel[i].Paciente;
+    const nombrePaciente = dataExcel[i].Paciente.replace(/\n$/, "");
     const dniPaciente = quitarPuntosDNI(dataExcel[i].DNI);
     const fechaNacimiento = dataExcel[i].FechaDeNacimiento;
     const fechaValidacion = dataExcel[i].FechaValidacion;
@@ -162,7 +163,7 @@ async function createAberrometriaPdf(input, output, i) {
       fechaValidacion.toString() +
         " / " +
         sumarMinutosAHorario(hora, minutosTopo) +
-        ":47",
+        ":13",
       {
         x: 385,
         y: 724,
@@ -206,7 +207,7 @@ async function createAberrometriaPdf(input, output, i) {
       fechaCambiada.toString() +
         " / " +
         sumarMinutosAHorario(hora, minutosTopo) +
-        ":05",
+        ":52",
       {
         x: 88,
         y: 29,
@@ -263,8 +264,8 @@ function funcionCompletaAberrometria() {
       } else {
         genero = "Mujer";
       }
-      const partesNombre = nombrePaciente.split(" ");
-      console.log("PARTEs", partesNombre);
+      const partesNombre = nombrePaciente.toUpperCase().replace(/ /g, "_");
+      console.log("PARTEs", nombrePaciente);
 
       function cambiarFormatoFecha(fecha) {
         var partesFecha = fecha.split("/");
@@ -288,7 +289,7 @@ function funcionCompletaAberrometria() {
 
         // Construir la cadena con el nuevo formato
         var nuevaFecha = dia + "-" + mes + "-" + año;
-        console.log("NUEVA FECHA", nuevaFecha);
+        // console.log("NUEVA FECHA", dataExcel[i]);
         return nuevaFecha;
       }
 
@@ -320,7 +321,7 @@ function funcionCompletaAberrometria() {
 
         // Construir la cadena con el nuevo formato
         var nuevaFecha = dia + "-" + mes + "-" + año;
-        console.log("NUEVA FECHA", nuevaFecha);
+        // console.log("NUEVA FECHA", nuevaFecha);
         return nuevaFecha;
       }
       const partesFechaEstudio =
@@ -335,9 +336,7 @@ function funcionCompletaAberrometria() {
 
         dniPaciente +
           "_" +
-          partesNombre[0] +
-          "_" +
-          partesNombre[1] +
+          partesNombre +
           "____" +
           partesFechaNacimiento[0] +
           "_" +

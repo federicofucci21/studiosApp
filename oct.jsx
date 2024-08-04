@@ -55,12 +55,13 @@ function cambiarFormatoFecha(fecha) {
 
   // Construir la cadena con el nuevo formato
   var nuevaFecha = año + "-" + mes + "-" + dia;
-  console.log("NUEVA FECHA", nuevaFecha);
+  // console.log("NUEVA FECHA", nuevaFecha);
   return nuevaFecha;
 }
 
 //FUNCION PARA QUITAR PUNTOS DEL DNI
 function quitarPuntosDNI(dni) {
+  dni = dni.toString();
   // Utilizamos una expresión regular para encontrar y reemplazar los puntos en el DNI
   return dni.replace(/\./g, "");
 }
@@ -92,7 +93,7 @@ async function createOctPdf(input, output, i, ox) {
     console.log(dataExcel[i].Hora);
 
     //NOMBRE
-    firstPage.drawText( capitalizeFullName(nombrePaciente), {
+    firstPage.drawText(capitalizeFullName(nombrePaciente), {
       x: 106,
       y: 793,
       // font: customFont,
@@ -153,7 +154,7 @@ async function createOctPdf(input, output, i, ox) {
     }
 
     //FECHA Y HORA 1
-    const minutosTopo = ox==="os"?11:12;
+    const minutosTopo = ox === "os" ? 12 : 11;
     firstPage.drawText(
       fechaValidacion.toString() +
         " / " +
@@ -200,7 +201,8 @@ async function createOctPdf(input, output, i, ox) {
     firstPage.drawText(
       fechaValidacion.toString() +
         " / " +
-        sumarMinutosAHorario(hora, minutosTopo),
+        // sumarMinutosAHorario(hora, minutosTopo),
+        "19:37",
       {
         x: 310,
         y: 64.5,
@@ -247,8 +249,8 @@ function funcionCompletaOct() {
   for (let i = 0; i < dataExcel.length; i++) {
     if (dataExcel[i].OCT == "x") {
       const dataExcel = leerExcel("baseDatos.xlsx");
-      const nombrePaciente = dataExcel[i].Paciente;
-      const dniPaciente = quitarPuntosDNI(dataExcel[i].DNI)
+      const nombrePaciente = dataExcel[i].Paciente.replace(/\n$/, "");
+      const dniPaciente = quitarPuntosDNI(dataExcel[i].DNI);
       const fechaNacimiento = dataExcel[i].FechaDeNacimiento;
       const fechaValidacion = dataExcel[i].FechaValidacion;
       let genero = dataExcel[i].genero;
@@ -257,8 +259,11 @@ function funcionCompletaOct() {
       } else {
         genero = "Female";
       }
-      const partesNombre = capitalizeFullName(nombrePaciente).split(" ");
-      console.log("PARTEs", partesNombre);
+      const partesNombre = capitalizeFullName(nombrePaciente).replace(
+        / /g,
+        "_"
+      );
+      console.log("PARTEs", dataExcel[i].mascuOA);
 
       function cambiarFormatoFecha(fecha) {
         var partesFecha = fecha.split("/");
@@ -282,7 +287,7 @@ function funcionCompletaOct() {
 
         // Construir la cadena con el nuevo formato
         var nuevaFecha = dia + "-" + mes + "-" + año;
-        console.log("NUEVA FECHA", nuevaFecha);
+        // console.log("NUEVA FECHA", nuevaFecha);
         return nuevaFecha;
       }
 
@@ -308,88 +313,278 @@ function funcionCompletaOct() {
 
         // Construir la cadena con el nuevo formato
         var nuevaFecha = año + mes + dia;
-        console.log("NUEVA FECHA", nuevaFecha);
+        // console.log("NUEVA FECHA", nuevaFecha);
         return nuevaFecha;
       }
 
-      // const partesFechaNacimiento =
-      //   cambiarFormatoFecha(fechaNacimiento).split("-");
-      // function numeroAlAzar(min, max) {
-      //   return Math.floor(Math.random() * (max - min + 1)) + min;
-      // }
-
-      // function cambiarFormatoFechaEstudio(fecha) {
-      //   var partesFechaEstudio = fecha.split("/");
-      //   var fechaObjeto = new Date(
-      //     partesFechaEstudio[2],
-      //     partesFechaEstudio[1] - 1,
-      //     partesFechaEstudio[0]
-      //   );
-
-      //   var dia = fechaObjeto.getDate();
-      //   var mes = fechaObjeto.getMonth() + 1;
-      //   var año = fechaObjeto.getFullYear();
-
-      //   // Añadir ceros iniciales si es necesario
-      //   if (dia < 10) {
-      //     dia = "0" + dia;
-      //   }
-      //   if (mes < 10) {
-      //     mes = "0" + mes;
-      //   }
-
-      //   // Construir la cadena con el nuevo formato
-      //   var nuevaFecha = dia + "-" + mes + "-" + año;
-      //   console.log("NUEVA FECHA", nuevaFecha);
-      //   return nuevaFecha;
-      // }
-      // const partesFechaEstudio =
-      //   cambiarFormatoFechaEstudio(fechaValidacion).split("-");
       function numeroAlAzar(min, max) {
         return Math.floor(Math.random() * (max - min + 1)) + min;
       }
       const fechaSinEspacios = cambiarFormatoFechaJunta(fechaNacimiento);
       const fechaEstudioSinEspacios = cambiarFormatoFechaJunta(fechaValidacion);
-      const numeroAzar = numeroAlAzar(1, 5)
+      // const numeroAzar = numeroAlAzar(a, b);
+
+      if (dataExcel[i].mascuOA == "x") {
+        createOctPdf(
+          "./oct/masculopatia/mascuOD/" + numeroAlAzar(1, 6) + "od.pdf",
+          // "Alejandro_Gloria Nancy_14491124_19611017_Female_Macula Cube 512x32_20230612093800_OD_Macular Thickness Analysis_20230612124241.pdf",
+
+          partesNombre +
+            "_" +
+            dniPaciente +
+            "_" +
+            fechaSinEspacios +
+            "_" +
+            genero +
+            "_Macula Cube 512x32_" +
+            fechaEstudioSinEspacios +
+            "_OD_Macular Thickness Analysis_" +
+            fechaEstudioSinEspacios +
+            ".pdf",
+          i,
+          "od"
+        );
+        createOctPdf(
+          "./oct/masculopatia/mascuOS/" + numeroAlAzar(1, 6) + ".pdf",
+
+          partesNombre +
+            "_" +
+            dniPaciente +
+            "_" +
+            fechaSinEspacios +
+            "_" +
+            genero +
+            "_Macula Cube 512x32_" +
+            fechaEstudioSinEspacios +
+            "_OS_Macular Thickness Analysis_" +
+            fechaEstudioSinEspacios +
+            ".pdf",
+          i,
+          "os"
+        );
+      }
+
+      if (dataExcel[i].mascuOI == "x") {
+        createOctPdf(
+          "./oct/" + numeroAlAzar(1, 5) + "od.pdf",
+          // "Alejandro_Gloria Nancy_14491124_19611017_Female_Macula Cube 512x32_20230612093800_OD_Macular Thickness Analysis_20230612124241.pdf",
+
+          partesNombre +
+            "_" +
+            dniPaciente +
+            "_" +
+            fechaSinEspacios +
+            "_" +
+            genero +
+            "_Macula Cube 512x32_" +
+            fechaEstudioSinEspacios +
+            "_OD_Macular Thickness Analysis_" +
+            fechaEstudioSinEspacios +
+            ".pdf",
+          i,
+          "od"
+        );
+        createOctPdf(
+          "./oct/masculopatia/mascuOS/" + numeroAlAzar(1, 6) + ".pdf",
+
+          partesNombre +
+            "_" +
+            dniPaciente +
+            "_" +
+            fechaSinEspacios +
+            "_" +
+            genero +
+            "_Macula Cube 512x32_" +
+            fechaEstudioSinEspacios +
+            "_OS_Macular Thickness Analysis_" +
+            fechaEstudioSinEspacios +
+            ".pdf",
+          i,
+          "os"
+        );
+      }
+
+      if (dataExcel[i].mascuOD == "x") {
+        createOctPdf(
+          "./oct/masculopatia/mascuOD/" + numeroAlAzar(1, 3) + ".pdf",
+
+          partesNombre +
+            "_" +
+            dniPaciente +
+            "_" +
+            fechaSinEspacios +
+            "_" +
+            genero +
+            "_Macula Cube 512x32_" +
+            fechaEstudioSinEspacios +
+            "_OD_Macular Thickness Analysis_" +
+            fechaEstudioSinEspacios +
+            ".pdf",
+          i,
+          "od"
+        );
+        createOctPdf(
+          "./oct/" + numeroAlAzar(1, 5) + "os.pdf",
+          // "Alejandro_Gloria Nancy_14491124_19611017_Female_Macula Cube 512x32_20230612093800_OD_Macular Thickness Analysis_20230612124241.pdf",
+
+          partesNombre +
+            "_" +
+            dniPaciente +
+            "_" +
+            fechaSinEspacios +
+            "_" +
+            genero +
+            "_Macula Cube 512x32_" +
+            fechaEstudioSinEspacios +
+            "_OS_Macular Thickness Analysis_" +
+            fechaEstudioSinEspacios +
+            ".pdf",
+          i,
+          "os"
+        );
+      }
+
+      if (dataExcel[i].despOA == "x") {
+        createOctPdf(
+          "./oct/desprendimiento/despOD/" + numeroAlAzar(1, 2) + ".pdf",
+          // "Alejandro_Gloria Nancy_14491124_19611017_Female_Macula Cube 512x32_20230612093800_OD_Macular Thickness Analysis_20230612124241.pdf",
+
+          partesNombre +
+            "_" +
+            dniPaciente +
+            "_" +
+            fechaSinEspacios +
+            "_" +
+            genero +
+            "_Macula Cube 512x32_" +
+            fechaEstudioSinEspacios +
+            "_OD_Macular Thickness Analysis_" +
+            fechaEstudioSinEspacios +
+            ".pdf",
+          i,
+          "od"
+        );
+        createOctPdf(
+          "./oct/desprendimiento/despOS/" + numeroAlAzar(1, 2) + ".pdf",
+
+          partesNombre +
+            "_" +
+            dniPaciente +
+            "_" +
+            fechaSinEspacios +
+            "_" +
+            genero +
+            "_Macula Cube 512x32_" +
+            fechaEstudioSinEspacios +
+            "_OS_Macular Thickness Analysis_" +
+            fechaEstudioSinEspacios +
+            ".pdf",
+          i,
+          "os"
+        );
+      }
+
+      if (dataExcel[i].despOI == "x") {
+        createOctPdf(
+          "./oct/" + numeroAlAzar(1, 2) + "od.pdf",
+          // "Alejandro_Gloria Nancy_14491124_19611017_Female_Macula Cube 512x32_20230612093800_OD_Macular Thickness Analysis_20230612124241.pdf",
+
+          partesNombre +
+            "_" +
+            dniPaciente +
+            "_" +
+            fechaSinEspacios +
+            "_" +
+            genero +
+            "_Macula Cube 512x32_" +
+            fechaEstudioSinEspacios +
+            "_OD_Macular Thickness Analysis_" +
+            fechaEstudioSinEspacios +
+            ".pdf",
+          i,
+          "od"
+        );
+        createOctPdf(
+          "./oct/desprendimiento/despOS/" + numeroAlAzar(1, 2) + ".pdf",
+
+          partesNombre +
+            "_" +
+            dniPaciente +
+            "_" +
+            fechaSinEspacios +
+            "_" +
+            genero +
+            "_Macula Cube 512x32_" +
+            fechaEstudioSinEspacios +
+            "_OS_Macular Thickness Analysis_" +
+            fechaEstudioSinEspacios +
+            ".pdf",
+          i,
+          "os"
+        );
+      }
+
+      if (dataExcel[i].despOD == "x") {
+        createOctPdf(
+          "./oct/desprendimiento/despOD/" + numeroAlAzar(1, 2) + ".pdf",
+
+          partesNombre +
+            "_" +
+            dniPaciente +
+            "_" +
+            fechaSinEspacios +
+            "_" +
+            genero +
+            "_Macula Cube 512x32_" +
+            fechaEstudioSinEspacios +
+            "_OD_Macular Thickness Analysis_" +
+            fechaEstudioSinEspacios +
+            ".pdf",
+          i,
+          "od"
+        );
+      }
 
       createOctPdf(
-        "./oct/" + numeroAzar + "od.pdf",
+        "./oct/" + numeroAlAzar(1, 5) + "od.pdf",
         // "Alejandro_Gloria Nancy_14491124_19611017_Female_Macula Cube 512x32_20230612093800_OD_Macular Thickness Analysis_20230612124241.pdf",
 
-          partesNombre[0] +
-          "_" +
-          partesNombre[1] +
+        partesNombre +
           "_" +
           dniPaciente +
           "_" +
           fechaSinEspacios +
-          "_"+genero+"_Macula Cube 512x32_" +
-          fechaEstudioSinEspacios+
+          "_" +
+          genero +
+          "_Macula Cube 512x32_" +
+          fechaEstudioSinEspacios +
           "_OD_Macular Thickness Analysis_" +
-          fechaEstudioSinEspacios+
+          fechaEstudioSinEspacios +
           ".pdf",
-        i, "od"
+        i,
+        "od"
       );
       createOctPdf(
-        "./oct/" + numeroAzar + "os.pdf",
+        "./oct/" + numeroAlAzar(1, 5) + "os.pdf",
         // "Alejandro_Gloria Nancy_14491124_19611017_Female_Macula Cube 512x32_20230612093800_OD_Macular Thickness Analysis_20230612124241.pdf",
 
-          partesNombre[0] +
-          "_" +
-          partesNombre[1] +
+        partesNombre +
           "_" +
           dniPaciente +
           "_" +
           fechaSinEspacios +
-          "_"+genero+"_Macula Cube 512x32_" +
-          fechaEstudioSinEspacios+
+          "_" +
+          genero +
+          "_Macula Cube 512x32_" +
+          fechaEstudioSinEspacios +
           "_OS_Macular Thickness Analysis_" +
-          fechaEstudioSinEspacios+
+          fechaEstudioSinEspacios +
           ".pdf",
-        i, "os"
+        i,
+        "os"
       );
     }
   }
 }
 
-funcionCompletaOct()
+funcionCompletaOct();

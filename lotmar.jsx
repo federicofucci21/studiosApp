@@ -91,7 +91,7 @@ async function createLotmarPdf(input, output, i) {
 
     //OBTENER NOMBRE DE EXCEL
     const dataExcel = leerExcel("baseDatos.xlsx");
-    const nombrePaciente = dataExcel[i].Paciente;
+    const nombrePaciente = dataExcel[i].Paciente.replace(/\n$/, "");
     const dniPaciente = quitarPuntosDNI(dataExcel[i].DNI);
     const fechaNacimiento = dataExcel[i].FechaDeNacimiento;
     const numAfiliado = dataExcel[i].Afiliado;
@@ -223,9 +223,13 @@ function funcionCompletaLotmar() {
     } else {
       if (dataExcel[i].Lotmar == "x") {
         const nombrePaciente = dataExcel[i].Paciente;
+        const dateForTitle = cambiarFormatoFecha(fechaValidacion);
         createLotmarPdf(
           "./modeloLotmar.pdf",
-          capitalizeFullName(nombrePaciente) + " LOTMAR" + ".pdf",
+          capitalizeFullName(nombrePaciente) +
+            "_LOTMAR_" +
+            dateForTitle +
+            ".pdf",
           i
         );
       }

@@ -55,7 +55,7 @@ function cambiarFormatoFecha(fecha) {
 
   // Construir la cadena con el nuevo formato
   var nuevaFecha = año + "-" + mes + "-" + dia;
-  console.log("NUEVA FECHA", nuevaFecha);
+  // console.log("NUEVA FECHA", nuevaFecha);
   return nuevaFecha;
 }
 
@@ -78,7 +78,7 @@ async function createHrtPdf(input, output, i) {
 
     //OBTENER NOMBRE DE EXCEL
     const dataExcel = leerExcel("baseDatos.xlsx");
-    const nombrePaciente = dataExcel[i].Paciente;
+    const nombrePaciente = dataExcel[i].Paciente.replace(/\n$/, "");
     const dniPaciente = quitarPuntosDNI(dataExcel[i].DNI);
     const fechaNacimiento = dataExcel[i].FechaDeNacimiento;
     const fechaValidacion = dataExcel[i].FechaValidacion;
@@ -195,22 +195,21 @@ async function createHrtPdf(input, output, i) {
     let fechaCambiada = cambiarFormatoFecha(fechaValidacion);
     //FECHA Y HORA 2
     const minutos2 = 15;
-    firstPage.drawText(
-      fechaValidacion.toString() + " / " + sumarMinutosAHorario(hora, minutos2),
-      {
-        x: 310,
-        y: 64.5,
-        size: 5.99,
-        weight: 700,
-        color: rgb(0, 0, 0),
-        weight: 700,
-        opacity: 1,
-      }
-    );
+    firstPage.drawText(fechaValidacion.toString() + " / " + "19:43", {
+      x: 310,
+      y: 64.5,
+      size: 5.99,
+      weight: 700,
+      color: rgb(0, 0, 0),
+      weight: 700,
+      opacity: 1,
+    });
     //FECHA Y HORA 3
     const minutos3 = 14;
     firstPage.drawText(
       fechaValidacion.toString() + " / " + sumarMinutosAHorario(hora, minutos3),
+
+      // sumarMinutosAHorario(hora, minutos3),
       {
         x: 400,
         y: 650,
@@ -263,13 +262,17 @@ function funcionCompletaHrt() {
       let genero = dataExcel[i].genero;
       if (genero === "h") {
         genero = "Male";
-      } else if (genero === "m"){
+      } else if (genero === "m") {
         genero = "Female";
       } else {
-        console.log("El paciente " + nombrePaciente + " no tiene un genero asignado" )
+        console.log(
+          "El paciente " + nombrePaciente + " no tiene un genero asignado"
+        );
       }
-      const partesNombre = capitalizeFullName(nombrePaciente).split(" ");
-      // console.log("PARTEs", partesNombre);
+      const partesNombre = capitalizeFullName(nombrePaciente).replace(
+        / /g,
+        "_"
+      );
 
       function cambiarFormatoFecha(fecha) {
         var partesFecha = fecha.split("/");
@@ -320,50 +323,13 @@ function funcionCompletaHrt() {
 
         // Construir la cadena con el nuevo formato
         var nuevaFecha = año.toString() + mes.toString() + dia.toString();
-        // console.log("NUEVA FECHA", nuevaFecha);
         return nuevaFecha;
       }
 
-      // const partesFechaNacimiento =
-      //   cambiarFormatoFecha(fechaNacimiento).split("-");
-      // function numeroAlAzar(min, max) {
-      //   return Math.floor(Math.random() * (max - min + 1)) + min;
-      // }
-
-      // function cambiarFormatoFechaEstudio(fecha) {
-      //   var partesFechaEstudio = fecha.split("/");
-      //   var fechaObjeto = new Date(
-      //     partesFechaEstudio[2],
-      //     partesFechaEstudio[1] - 1,
-      //     partesFechaEstudio[0]
-      //   );
-
-      //   var dia = fechaObjeto.getDate();
-      //   var mes = fechaObjeto.getMonth() + 1;
-      //   var año = fechaObjeto.getFullYear();
-
-      //   // Añadir ceros iniciales si es necesario
-      //   if (dia < 10) {
-      //     dia = "0" + dia;
-      //   }
-      //   if (mes < 10) {
-      //     mes = "0" + mes;
-      //   }
-
-      //   // Construir la cadena con el nuevo formato
-      //   var nuevaFecha = dia + "-" + mes + "-" + año;
-      //   console.log("NUEVA FECHA", nuevaFecha);
-      //   return nuevaFecha;
-      // }
-      // const partesFechaEstudio =
-      //   cambiarFormatoFechaEstudio(fechaValidacion).split("-");
       function numeroAlAzar(min, max) {
         return Math.floor(Math.random() * (max - min + 1)) + min;
       }
-      console.log("nombrepaciente ", nombrePaciente);
-      console.log("FechaNacimiento", fechaNacimiento)
       const fechaSinEspacios = cambiarFormatoFechaJunta(fechaNacimiento);
-      console.log("fechaSinEspacios", fechaSinEspacios)
       const fechaEstudioSinEspacios = cambiarFormatoFechaJunta(fechaValidacion);
       const numeroAzar = numeroAlAzar(1, 6);
 
@@ -371,9 +337,7 @@ function funcionCompletaHrt() {
         "./hrt/" + numeroAzar + ".pdf",
         // "Bianchi_Florinda_10080922_19520228_Female_Optic Disc Cube 128x128_20230628110825_OU_ONH _ RNFL Analysis_20230629115021",
 
-        partesNombre[0] +
-          "_" +
-          partesNombre[1] +
+        partesNombre +
           "_" +
           dniPaciente +
           "_" +
@@ -391,4 +355,4 @@ function funcionCompletaHrt() {
   }
 }
 
-funcionCompletaHrt()
+funcionCompletaHrt();

@@ -3,6 +3,7 @@ const { readFile } = require("fs/promises");
 const fs = require("fs");
 const path = require("path");
 const XLSX = require("xlsx");
+const { type } = require("os");
 
 // FUNCION PARA OBTENER EN FORMATO JSON LOS DATOS DEL EXCEL
 function leerExcel(ruta) {
@@ -55,19 +56,25 @@ function cambiarFormatoFecha(fecha) {
 
   // Construir la cadena con el nuevo formato
   var nuevaFecha = año + "-" + mes + "-" + dia;
-  console.log("NUEVA FECHA", nuevaFecha);
+  // console.log("NUEVA FECHA", nuevaFecha);
   return nuevaFecha;
 }
 
 //FUNCION PARA QUITAR PUNTOS DEL DNI
 function quitarPuntosDNI(dni) {
+  // console.log(typeof(dni));
+dni = dni.toString();
+// console.log(typeof(dni));
+  if(dni === undefined || dni === null){
+    return "ERROR DE DNI"
+  }
   // Utilizamos una expresión regular para encontrar y reemplazar los puntos en el DNI
   return dni.replace(/\./g, "");
 }
 
 // FUNCION PARA CREAR NUEVO PDF PAQUI
 async function createCamposPdf(input, output, i) {
-  console.log("INPUT", input);
+  // console.log("INPUT", input);
   try {
     const pdfDoc = await PDFDocument.load(await readFile(input));
     // console.log("pfDoc", pdfDoc);
@@ -78,20 +85,24 @@ async function createCamposPdf(input, output, i) {
 
     //OBTENER NOMBRE DE EXCEL
     const dataExcel = leerExcel("baseDatos.xlsx");
-    const nombrePaciente = dataExcel[i].Paciente;
+    const nombrePaciente = dataExcel[i].Paciente.replace(/\n$/, "");
     const dniPaciente = quitarPuntosDNI(dataExcel[i].DNI);
     const fechaNacimiento = dataExcel[i].FechaDeNacimiento;
     const fechaValidacion = dataExcel[i].FechaValidacion;
     const hora = dataExcel[i].Hora;
     let genero = dataExcel[i].genero;
-    if (genero === "h") {
+    console.log("1",genero)
+    console.log("2",dataExcel[i])
+    if (genero == "h") {
       genero = "Hombre";
-    } else {
+    } if (genero === "m"){
       genero = "Mujer";
+    } else {
+      console.log(`Paciente ${nombrePaciente} no contiene datos sobre su genero`)
     }
-    console.log(dataExcel[i].Hora);
-    console.log("NOMBRE PACIENTE", capitalizeFullName(nombrePaciente));
-    console.log("FECHA NACIMIENTO", fechaNacimiento);
+    // console.log(dataExcel[i].Hora);
+    // console.log("NOMBRE PACIENTE", capitalizeFullName(nombrePaciente));
+    // console.log("FECHA NACIMIENTO", fechaNacimiento);
 
     //NOMBRE
     firstPage.drawText(
@@ -118,7 +129,7 @@ async function createCamposPdf(input, output, i) {
       weight: 700,
       opacity: 1,
     });
-    console.log("nombre");
+    // console.log("nombre");
 
     function sumarMinutosAHorario(horario, minutosASumar) {
       // Convertir el horario a horas y minutos
@@ -148,7 +159,7 @@ async function createCamposPdf(input, output, i) {
         sumarMinutosAHorario(hora, minutosOS) +
         ":22",
       {
-        x: 416,
+        x: 46,
         y: 479,
         size: 8.99,
         weight: 700,
@@ -167,7 +178,7 @@ async function createCamposPdf(input, output, i) {
         sumarMinutosAHorario(hora, minutosOD) +
         ":10",
       {
-        x: 46,
+        x: 416,
         y: 479,
         size: 8.99,
         weight: 700,
@@ -211,16 +222,21 @@ function funcionCompletaCampos() {
   for (let i = 0; i < dataExcel.length; i++) {
     if (dataExcel[i].CampoVisual == "x") {
       const dataExcel = leerExcel("baseDatos.xlsx");
+
+      // console.log("DATA", dataExcel[i]);
       const nombrePaciente = dataExcel[i].Paciente;
       const dniPaciente = quitarPuntosDNI(dataExcel[i].DNI);
       const fechaNacimiento = dataExcel[i].FechaDeNacimiento;
       let genero = dataExcel[i].Observaciones;
-      if (genero === "h") {
+      if (genero == "h") {
         genero = "Hombre";
       } else {
         genero = "Mujer";
       }
-      const partesNombre = capitalizeFullName(nombrePaciente).split(" ");
+      const partesNombre = capitalizeFullName(nombrePaciente).replace(
+        / /g,
+        "_"
+      );
 
       function cambiarFormatoFecha(fecha) {
         var partesFecha = fecha.split("/");
@@ -244,7 +260,7 @@ function funcionCompletaCampos() {
 
         // Construir la cadena con el nuevo formato
         var nuevaFecha = año + "-" + mes + "-" + dia;
-        console.log("NUEVA FECHA", nuevaFecha);
+        // console.log("NUEVA FECHA", nuevaFecha);
         return nuevaFecha;
       }
 
@@ -253,14 +269,65 @@ function funcionCompletaCampos() {
         return Math.floor(Math.random() * (max - min + 1)) + min;
       }
 
+      if (dataExcel[i].negroOD == "x") {
+        createCamposPdf(
+          "./campos/negros/negroOD/1.pdf",
+
+          dniPaciente +
+            "_" +
+            partesNombre +
+            "_" +
+            partesFecha[0] +
+            "_" +
+            partesFecha[1] +
+            "_" +
+            partesFecha[2] +
+            "_Both_eyes.pdf",
+          i
+        );
+      }
+      if (dataExcel[i].negroOI == "x") {
+        createCamposPdf(
+          "./campos/negros/negroOS/" + numeroAlAzar(1, 2) + ".pdf",
+
+          dniPaciente +
+            "_" +
+            partesNombre +
+            "_" +
+            partesFecha[0] +
+            "_" +
+            partesFecha[1] +
+            "_" +
+            partesFecha[2] +
+            "_Both_eyes.pdf",
+          i
+        );
+      }
+      if (dataExcel[i].negroOA == "x") {
+        console.log("NEGRO", dataExcel[i]);
+        createCamposPdf(
+          "./campos/negros/negroOA/1.pdf",
+
+          dniPaciente +
+            "_" +
+            partesNombre +
+            "_" +
+            partesFecha[0] +
+            "_" +
+            partesFecha[1] +
+            "_" +
+            partesFecha[2] +
+            "_Both_eyes.pdf",
+          i
+        );
+      }
+
       createCamposPdf(
-        "./campos/" + numeroAlAzar(1, 10) + ".pdf",
+        "./campos/" + numeroAlAzar(1, 6) + ".pdf",
 
         dniPaciente +
           "_" +
-          partesNombre[0] +
-          "_" +
-          partesNombre[1] +
+          partesNombre +
           "_" +
           partesFecha[0] +
           "_" +
@@ -275,3 +342,80 @@ function funcionCompletaCampos() {
 }
 
 funcionCompletaCampos();
+
+// if (dataExcel[i].negroOD == "x") {
+//   createCamposPdf(
+//     "./campos/negros/negroOD/1.pdf",
+
+//     dniPaciente +
+//       "_" +
+//       partesNombre[0] +
+//       "_" +
+//       partesNombre[1] +
+//       "_" +
+//       partesFecha[0] +
+//       "_" +
+//       partesFecha[1] +
+//       "_" +
+//       partesFecha[2] +
+//       "_Both_eyes.pdf",
+//     i
+//   );
+// }
+// if (dataExcel[i].negroOI == "x") {
+//   createCamposPdf(
+//     "./campos/negros/negroOS/" + numeroAlAzar(1, 2) + ".pdf",
+
+//     dniPaciente +
+//       "_" +
+//       partesNombre[0] +
+//       "_" +
+//       partesNombre[1] +
+//       "_" +
+//       partesFecha[0] +
+//       "_" +
+//       partesFecha[1] +
+//       "_" +
+//       partesFecha[2] +
+//       "_Both_eyes.pdf",
+//     i
+//   );
+// }
+// if (dataExcel[i].negroOA == "x") {
+//   console.log("NEGRO", dataExcel[i]);
+//   createCamposPdf(
+//     "./campos/negros/negroOA/1.pdf",
+
+//     dniPaciente +
+//       "_" +
+//       partesNombre[0] +
+//       "_" +
+//       partesNombre[1] +
+//       "_" +
+//       partesFecha[0] +
+//       "_" +
+//       partesFecha[1] +
+//       "_" +
+//       partesFecha[2] +
+//       "_Both_eyes.pdf",
+//     i
+//   );
+// }
+
+// createCamposPdf(
+//   "./campos/" + numeroAlAzar(1, 8) + ".pdf",
+
+//   dniPaciente +
+//     "_" +
+//     partesNombre[0] +
+//     "_" +
+//     partesNombre[1] +
+//     "_" +
+//     partesFecha[0] +
+//     "_" +
+//     partesFecha[1] +
+//     "_" +
+//     partesFecha[2] +
+//     "_Both_eyes.pdf",
+//   i
+// );

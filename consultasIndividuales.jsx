@@ -3,6 +3,7 @@ const { readFile } = require("fs/promises");
 const fs = require("fs");
 const path = require("path");
 const XLSX = require("xlsx");
+const fontkit = require("@pdf-lib/fontkit");
 
 // FUNCION PARA OBTENER EN FORMATO JSON LOS DATOS DEL EXCEL
 function leerExcel(ruta) {
@@ -47,7 +48,7 @@ function capitalizeFullName(fullName) {
 // }
 
 //FUNCION PARA MODIFICAR FORMATO DE FECHA
-function cambiarFormatoFecha(fecha) {
+async function cambiarFormatoFecha(fecha) {
   var partesFecha = fecha.split("/");
   var fechaObjeto = new Date(
     partesFecha[2],
@@ -69,7 +70,7 @@ function cambiarFormatoFecha(fecha) {
 
   // Construir la cadena con el nuevo formato
   var nuevaFecha = año + "-" + mes + "-" + dia;
-  console.log("NUEVA FECHA", nuevaFecha);
+  // console.log("NUEVA FECHA", nuevaFecha);
   return nuevaFecha;
 }
 
@@ -77,6 +78,7 @@ function cambiarFormatoFecha(fecha) {
 async function createConsultaPdf(input, output, i) {
   try {
     const pdfDoc = await PDFDocument.load(await readFile(input));
+    pdfDoc.registerFontkit(fontkit);
 
     //PRUEBA DE ESCRIBIR EN EL DOCUMENTO
     const pages = pdfDoc.getPages();
@@ -84,9 +86,12 @@ async function createConsultaPdf(input, output, i) {
 
     //OBTENER NOMBRE DE EXCEL
     const dataExcel = leerExcel("baseDatos.xlsx");
-    const nombrePaciente = dataExcel[i].Paciente;
+    const nombrePaciente = dataExcel[i].Paciente.replace(/\n$/, "");
     const numAfiliado = dataExcel[i].Afiliado;
     const fechaValidacion = dataExcel[i].FechaValidacion;
+    //CARGAR FUENTE
+    const fontBytes = fs.readFileSync("./fonts/arialnarrow.ttf");
+    const customFont = await pdfDoc.embedFont(fontBytes);
 
     //NOMBRE
     firstPage.drawText(capitalizeFullName(nombrePaciente), {
@@ -97,7 +102,6 @@ async function createConsultaPdf(input, output, i) {
       color: rgb(0, 0, 0),
       opacity: 1,
     });
-
 
     //NUMERO AFILIADO
     firstPage.drawText("PAMI " + numAfiliado, {
@@ -150,7 +154,36 @@ async function createConsultaPdf(input, output, i) {
 function funcionCompletaConsultas() {
   const dataExcel = leerExcel("baseDatos.xlsx");
 
+  function cambiarFormatoFecha(fecha) {
+    var partesFecha = fecha.split("/");
+    var fechaObjeto = new Date(
+      partesFecha[2],
+      partesFecha[1] - 1,
+      partesFecha[0]
+    );
+
+    var dia = fechaObjeto.getDate();
+    var mes = fechaObjeto.getMonth() + 1;
+    var año = fechaObjeto.getFullYear();
+
+    // Añadir ceros iniciales si es necesario
+    if (dia < 10) {
+      dia = "0" + dia;
+    }
+    if (mes < 10) {
+      mes = "0" + mes;
+    }
+
+    // Construir la cadena con el nuevo formato
+    var nuevaFecha = dia + "-" + mes + "-" + año;
+    return nuevaFecha;
+  }
+
   for (let i = 0; i < dataExcel.length; i++) {
+    if (dataExcel[i].Paciente == undefined) {
+      console.log("Chech your INFO");
+    }
+
     if (dataExcel[i].consulta === undefined || dataExcel[i].consulta === null) {
       console.log(
         "PACIENTE: " +
@@ -161,17 +194,31 @@ function funcionCompletaConsultas() {
       const consulta = dataExcel[i].consulta;
       if (dataExcel[i].consulta == 1) {
         const nombrePaciente = dataExcel[i].Paciente;
+        const fechaValidacion = dataExcel[i].FechaValidacion;
+        const dateForTitle = cambiarFormatoFecha(fechaValidacion);
         createConsultaPdf(
           "./primerConsultaInd.pdf",
-          capitalizeFullName(nombrePaciente) + ".pdf",
+          capitalizeFullName(nombrePaciente) + " Primer Consulta " + dateForTitle + ".pdf",
           i
         );
       }
       if (dataExcel[i].consulta == 2) {
         const nombrePaciente = dataExcel[i].Paciente;
+        const fechaValidacion = dataExcel[i].FechaValidacion;
+        const dateForTitle = cambiarFormatoFecha(fechaValidacion);
         createConsultaPdf(
           "./consultaSeguimientoInd.pdf",
-          capitalizeFullName(nombrePaciente) + ".pdf",
+          capitalizeFullName(nombrePaciente) + " Consulta de Seguimiento " + dateForTitle + ".pdf",
+          i
+        );
+      }
+      if (dataExcel[i].consulta == 3) {
+        const nombrePaciente = dataExcel[i].Paciente;
+        const fechaValidacion = dataExcel[i].FechaValidacion;
+        const dateForTitle = cambiarFormatoFecha(fechaValidacion);
+        createConsultaPdf(
+          "./consultaGuardia.pdf",
+          capitalizeFullName(nombrePaciente) + " Consulta de Guardia " + dateForTitle + ".pdf",
           i
         );
       }

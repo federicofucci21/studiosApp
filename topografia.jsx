@@ -28,6 +28,7 @@ function capitalizeFullName(fullName) {
     word = word.charAt(0).toUpperCase() + word.slice(1); // Convertir la primera letra en mayúscula
     words[i] = word; // Actualizar la palabra en el array
   }
+  // console.log("PALABRAS", words)
   // Unir las palabras nuevamente en un solo string
   return words.join(" ");
 }
@@ -55,12 +56,13 @@ function cambiarFormatoFecha(fecha) {
 
   // Construir la cadena con el nuevo formato
   var nuevaFecha = año + "-" + mes + "-" + dia;
-  console.log("NUEVA FECHA", nuevaFecha);
+  // console.log("NUEVA FECHA", nuevaFecha);
   return nuevaFecha;
 }
 
 //FUNCION PARA QUITAR PUNTOS DEL DNI
 function quitarPuntosDNI(dni) {
+  dni = dni.toString();
   // Utilizamos una expresión regular para encontrar y reemplazar los puntos en el DNI
   return dni.replace(/\./g, "");
 }
@@ -78,7 +80,7 @@ async function createTopografiaPdf(input, output, i) {
 
     //OBTENER NOMBRE DE EXCEL
     const dataExcel = leerExcel("baseDatos.xlsx");
-    const nombrePaciente = dataExcel[i].Paciente;
+    const nombrePaciente = dataExcel[i].Paciente.replace(/\n$/, "");
     const dniPaciente = quitarPuntosDNI(dataExcel[i].DNI);
     const fechaNacimiento = dataExcel[i].FechaDeNacimiento;
     const fechaValidacion = dataExcel[i].FechaValidacion;
@@ -162,7 +164,7 @@ async function createTopografiaPdf(input, output, i) {
       fechaValidacion.toString() +
         " / " +
         sumarMinutosAHorario(hora, minutosTopo) +
-        ":47",
+        ":05",
       {
         x: 385,
         y: 724,
@@ -206,7 +208,7 @@ async function createTopografiaPdf(input, output, i) {
       fechaCambiada.toString() +
         " / " +
         sumarMinutosAHorario(hora, minutosTopo) +
-        ":05",
+        ":47",
       {
         x: 120,
         y: 35,
@@ -263,8 +265,8 @@ function funcionCompletaTopografia() {
       } else {
         genero = "Mujer";
       }
-      const partesNombre = nombrePaciente.split(" ");
-      console.log("PARTEs", partesNombre);
+      const partesNombre = nombrePaciente.toUpperCase().replace(/ /g, "_");
+      console.log("NOMBRE", partesNombre);
 
       function cambiarFormatoFecha(fecha) {
         var partesFecha = fecha.split("/");
@@ -288,10 +290,9 @@ function funcionCompletaTopografia() {
 
         // Construir la cadena con el nuevo formato
         var nuevaFecha = dia + "-" + mes + "-" + año;
-        console.log("NUEVA FECHA", nuevaFecha);
+        // console.log("NUEVA FECHA", nuevaFecha);
         return nuevaFecha;
       }
-
 
       const partesFechaNacimiento =
         cambiarFormatoFecha(fechaNacimiento).split("-");
@@ -300,6 +301,7 @@ function funcionCompletaTopografia() {
       }
 
       function cambiarFormatoFechaEstudio(fecha) {
+        console.log("FECHA", fecha);
         var partesFechaEstudio = fecha.split("/");
         var fechaObjeto = new Date(
           partesFechaEstudio[2],
@@ -321,7 +323,7 @@ function funcionCompletaTopografia() {
 
         // Construir la cadena con el nuevo formato
         var nuevaFecha = dia + "-" + mes + "-" + año;
-        console.log("NUEVA FECHA", nuevaFecha);
+        // console.log("NUEVA FECHA", partesNombre[1]);
         return nuevaFecha;
       }
       const partesFechaEstudio =
@@ -336,9 +338,7 @@ function funcionCompletaTopografia() {
 
         dniPaciente +
           "_" +
-          partesNombre[0] +
-          "_" +
-          partesNombre[1] +
+          partesNombre +
           "____" +
           partesFechaNacimiento[0] +
           "_" +
