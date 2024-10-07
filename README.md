@@ -14,7 +14,7 @@ To install and run the application, follow these steps:
 bash
 Copiar código
 # Clone the repository
-git clone https://github.com/yourusername/studiosApp.git
+git clone https://github.com/federicofucci21/studiosApp.git
 
 # Navigate to the project directory
 cd studiosApp
