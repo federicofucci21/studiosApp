@@ -11,8 +11,6 @@ Export functionality for sharing or archiving reports efficiently.
 Installation:
 To install and run the application, follow these steps:
 
-bash
-Copiar código
 # Clone the repository
 git clone https://github.com/federicofucci21/studiosApp.git
 
@@ -27,7 +25,5 @@ Create a folder named "estudiosTerminados" on the root
 Usage:
 After installation, you can run the application by executing the following command:
 
-bash
-Copiar código
 node app.js
 The app will prompt you to input or load consultation data from an Excel file, which will then be automatically converted into a PDF report.
