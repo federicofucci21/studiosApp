@@ -1,0 +1,17 @@
+# Node.js dependencies
+node_modules/
+npm-debug.log
+
+# Logs
+logs/
+*.log
+
+# Excel files (if you don't want to track Excel data files)
+estudiosTerminados/
+
+# Environment variables (sensitive information)
+.env
+
+# OS files (Mac/Linux/Windows)
+.DS_Store
+Thumbs.db
