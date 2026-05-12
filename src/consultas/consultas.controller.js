@@ -1,0 +1,52 @@
+import {
+  cambiarFormatoFechaGuion,
+  capitalizeFullName,
+} from "../../assets/tools.js";
+import { consultasService } from "./consultas.service.js";
+
+export function consultasController(data) {
+  const nombrePaciente = data.Paciente;
+  const fechaValidacion = data.FechaValidacion;
+  const dateForTitle = cambiarFormatoFechaGuion(fechaValidacion);
+  if (data.Paciente == undefined) {
+    console.log("Chech your INFO");
+  }
+
+  if (data.consulta == 1) {
+    consultasService(
+      "./files/consultas/primerConsultaInd.pdf",
+      capitalizeFullName(nombrePaciente) +
+        " Consulta Oftalmológica " +
+        dateForTitle +
+        ".pdf",
+      data,
+    );
+  }
+  if (data.consulta == 2) {
+    consultasService(
+      "./files/consultas/consultaSeguimientoInd.pdf",
+      capitalizeFullName(nombrePaciente) +
+        " Consulta de Seguimiento " +
+        dateForTitle +
+        ".pdf",
+      data,
+    );
+  }
+  if (data.consulta == 3) {
+    consultasService(
+      "./files/consultas/consultaGuardia.pdf",
+      capitalizeFullName(nombrePaciente) +
+        " Consulta de Guardia " +
+        dateForTitle +
+        ".pdf",
+      data,
+    );
+  }
+  if (data.consulta == 4) {
+    consultasService(
+      "./files/consultas/historiaClinica.pdf",
+      capitalizeFullName(nombrePaciente) + "_HC.pdf",
+      data,
+    );
+  }
+}
